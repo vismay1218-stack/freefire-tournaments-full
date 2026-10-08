@@ -1,0 +1,101 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Tournament Details{% endblock %}
+{% block content %}
+<div class="flex-between">
+  <h1 class="page-title">Tournament Details</h1>
+  <div>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('admin_tournaments.list_') }}">← Back</a>
+    <a class="btn btn-accent btn-sm" href="{{ url_for('admin_tournaments.edit', tournament_id=tournament.id) }}">Edit Tournament</a>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('admin_export.excel', tournament_id=tournament.id) }}">Download Tournament Excel</a>
+  </div>
+</div>
+
+{% if tournament %}
+  <div class="card">
+    <div class="flex-between">
+      <div>
+        <h2>{{ tournament.name }}</h2>
+        <span class="badge badge-{{ tournament.status | lower }}">{{ tournament.status }}</span>
+      </div>
+      <div class="muted">
+        Created: {{ tournament.created_at.strftime('%Y-%m-%d %H:%M') }}
+      </div>
+    </div>
+    {% if tournament.description %}
+      <p>{{ tournament.description }}</p>
+    {% endif %}
+  </div>
+
+  <div class="card-grid" style="margin-top:1rem">
+    <div class="card stat-card"><div class="stat-label">Date & Time</div><div class="stat-value" style="font-size:1rem">{{ tournament.date }} {{ tournament.time }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Map</div><div class="stat-value" style="font-size:1rem">{{ tournament.map_name }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Entry Fee</div><div class="stat-value">{{ tournament.entry_fee|currency }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Prize Pool</div><div class="stat-value stat-green">{{ tournament.prize_pool|currency }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Confirmed Teams</div><div class="stat-value">{{ tournament.confirmed_count }} / {{ tournament.max_teams }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Registration Deadline</div><div class="stat-value" style="font-size:0.9rem">{{ tournament.registration_deadline.strftime('%Y-%m-%d %H:%M') }}</div></div>
+  </div>
+
+  {% if tournament.rules %}
+  <section class="section">
+    <h2>Rules</h2>
+    <div class="card">
+      <pre style="white-space:pre-wrap;margin:0">{{ tournament.rules }}</pre>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="section">
+    <div class="flex-between">
+      <h2>Registrations ({{ registrations|length }})</h2>
+      <a class="btn btn-outline btn-sm" href="{{ url_for('admin_registrations.list_', tournament_id=tournament.id) }}">View All</a>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>ID</th><th>Team</th><th>Captain</th><th>Phone</th><th>Payment</th><th>Status</th><th>Registered</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        {% for r in registrations %}
+          <tr>
+            <td>{{ r.id }}</td>
+            <td><strong>{{ r.team_name }}</strong></td>
+            <td>{{ r.captain_name }}</td>
+            <td>{{ r.captain_phone }}</td>
+            <td>
+              {% if r.payment_status == 'VERIFIED' %}
+                <span class="badge badge-green">Verified</span>
+              {% elif r.payment_status == 'PAID_PENDING' %}
+                <span class="badge badge-orange">Pending</span>
+              {% elif r.payment_status == 'FAILED' %}
+                <span class="badge badge-red">Failed</span>
+              {% else %}
+                <span class="badge">{{ r.payment_status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.registration_status == 'CONFIRMED' %}
+                <span class="badge badge-green">Confirmed</span>
+              {% elif r.registration_status == 'PENDING_PAYMENT_VERIFICATION' %}
+                <span class="badge badge-orange">Pending Payment</span>
+              {% elif r.registration_status == 'REJECTED' %}
+                <span class="badge badge-red">Rejected</span>
+              {% else %}
+                <span class="badge">{{ r.registration_status }}</span>
+              {% endif %}
+            </td>
+            <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+              <a class="btn btn-sm btn-outline" href="{{ url_for('admin_registrations.view', registration_id=r.id) }}">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="muted">No registrations yet for this tournament.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% else %}
+  <div class="card"><p class="muted">Tournament not loaded yet.</p></div>
+{% endif %}
+{% endblock %}

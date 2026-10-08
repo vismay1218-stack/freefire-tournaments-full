@@ -1,0 +1,52 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Edit' if tournament else 'New' }} Tournament{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ 'Edit Tournament' if tournament else 'New Tournament' }}</h1>
+<form method="post" class="form card p-lg">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <label>Name<input required name="name" value="{% if form_data %}{{ form_data.get('name','') }}{% elif tournament %}{{ tournament.name }}{% endif %}" />
+  {% if errors and errors.get('name') %}<span class="error-text">{{ errors['name'] }}</span>{% endif %}
+  </label>
+  <label>Description<textarea name="description" rows="3">{% if form_data %}{{ form_data.get('description','') }}{% elif tournament %}{{ tournament.description }}{% endif %}</textarea></label>
+  <div class="grid-2">
+    <label>Entry Fee (₹)<input type="number" min="0" step="1" required name="entry_fee" value="{% if form_data %}{{ form_data.get('entry_fee','') }}{% elif tournament %}{{ tournament.entry_fee }}{% endif %}" />
+    {% if errors and errors.get('entry_fee') %}<span class="error-text">{{ errors['entry_fee'] }}</span>{% endif %}
+    </label>
+    <label>Prize Pool (₹)<input type="number" min="0" step="1" required name="prize_pool" value="{% if form_data %}{{ form_data.get('prize_pool','') }}{% elif tournament %}{{ tournament.prize_pool }}{% endif %}" />
+    {% if errors and errors.get('prize_pool') %}<span class="error-text">{{ errors['prize_pool'] }}</span>{% endif %}
+    </label>
+  </div>
+  <div class="grid-2">
+    <label>Date<input type="date" required name="date" value="{% if form_data %}{{ form_data.get('date','') }}{% elif tournament %}{{ tournament.date }}{% endif %}" />
+    {% if errors and errors.get('date') %}<span class="error-text">{{ errors['date'] }}</span>{% endif %}
+    </label>
+    <label>Time<input type="time" required name="time" value="{% if form_data %}{{ form_data.get('time','') }}{% elif tournament %}{{ tournament.time }}{% endif %}" />
+    {% if errors and errors.get('time') %}<span class="error-text">{{ errors['time'] }}</span>{% endif %}
+    </label>
+  </div>
+  <div class="grid-2">
+    <label>Map<input required name="map_name" value="{% if form_data %}{{ form_data.get('map_name','') }}{% elif tournament %}{{ tournament.map_name }}{% endif %}" placeholder="Bermuda / Kalahari ..." />
+    {% if errors and errors.get('map_name') %}<span class="error-text">{{ errors['map_name'] }}</span>{% endif %}
+    </label>
+    <label>Max Teams<input type="number" min="1" required name="max_teams" value="{% if form_data %}{{ form_data.get('max_teams','') }}{% elif tournament %}{{ tournament.max_teams }}{% else %}48{% endif %}" />
+    {% if errors and errors.get('max_teams') %}<span class="error-text">{{ errors['max_teams'] }}</span>{% endif %}
+    </label>
+  </div>
+  <label>Registration Deadline<input type="datetime-local" required name="registration_deadline" value="{% if form_data %}{{ form_data.get('registration_deadline','') }}{% elif tournament and tournament.registration_deadline %}{{ tournament.registration_deadline.strftime('%Y-%m-%dT%H:%M') }}{% endif %}" />
+  {% if errors and errors.get('registration_deadline') %}<span class="error-text">{{ errors['registration_deadline'] }}</span>{% endif %}
+  </label>
+  <label>Rules<textarea name="rules" rows="6" placeholder="1. No emulator...&#10;2. ...">{% if form_data %}{{ form_data.get('rules','') }}{% elif tournament %}{{ tournament.rules }}{% endif %}</textarea></label>
+  <label>Status
+    <select name="status" required>
+      {% for s in ['DRAFT','OPEN','CLOSED','COMPLETED'] %}
+        <option value="{{ s }}" {% if (form_data and form_data.get('status') == s) or (tournament and tournament.status == s) %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    {% if errors and errors.get('status') %}<span class="error-text">{{ errors['status'] }}</span>{% endif %}
+  </label>
+  <div class="row">
+    <button class="btn btn-accent" type="submit">Save Tournament</button>
+    <a class="btn btn-outline" href="{{ url_for('admin_tournaments.list_') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
