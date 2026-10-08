@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Winners{% endblock %}
+{% block content %}
+<h1 class="page-title">🏆 Winners & Tournament Proofs</h1>
+{% if winners %}
+  <div class="card-grid winners-grid">
+    {% for w in winners %}
+      <div class="card winner-card">
+        <img src="{{ url_for('public_media.winner_image', filename=w.image_path) }}" alt="{{ w.title }}" class="winner-img" />
+        <div class="winner-meta">
+          <h3>{{ w.title }}</h3>
+          <p class="muted">{{ w.description }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card"><p class="muted">No winners yet. Check back soon!</p></div>
+{% endif %}
+{% endblock %}

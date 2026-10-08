@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Tournaments{% endblock %}
+{% block content %}
+<h1 class="page-title">All Tournaments</h1>
+{% if tournaments %}
+  <div class="card-grid tournament-grid">
+    {% for t in tournaments %}
+      {% include "public/_tournament_card.html" %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card"><p class="muted">No tournaments to show.</p></div>
+{% endif %}
+{% endblock %}

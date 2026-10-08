@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Status Result{% endblock %}
+{% block content %}
+<h1 class="page-title">Registration Status</h1>
+{% if not_found %}
+  <div class="card">
+    <div class="flash flash-danger">Registration not found. Check your Registration ID and phone number.</div>
+  </div>
+{% elif registration %}
+  <div class="card">
+    <h2>{{ registration.team_name }}</h2>
+    <p class="badge badge-{{ registration.registration_status | lower | replace('_','-') }}">
+      {{ registration.registration_status | replace('_', ' ') | title }}
+    </p>
+    <div class="grid-2">
+      <div class="kv"><b>Tournament</b><span>{{ registration.tournament.name if registration.tournament else '' }}</span></div>
+      <div class="kv"><b>Captain</b><span>{{ registration.captain_name }} · {{ registration.captain_phone }}</span></div>
+      <div class="kv"><b>Team ID</b><span>{{ registration.registration_id or '—' }}</span></div>
+      <div class="kv"><b>Confirmation Date</b><span>{{ registration.confirmation_date if registration.confirmation_date else '—' }}</span></div>
+      {% if registration.registration_status == 'REJECTED' %}
+        <div class="kv grid-span-2"><b>Rejection Reason</b><span class="stat-red">{{ registration.rejection_reason or '—' }}</span></div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+<a class="btn btn-outline" href="{{ url_for('public.status_lookup') }}">Check Another</a>
+{% endblock %}

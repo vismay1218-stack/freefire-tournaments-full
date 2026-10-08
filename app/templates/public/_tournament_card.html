@@ -1,0 +1,19 @@
+<div class="card tournament-card {% if t.status != 'OPEN' %}tournament-closed{% endif %}">
+  <div class="card-header">
+    <h3 class="t-name">{{ t.name }}</h3>
+    <span class="badge badge-{{ t.status | lower }}">{{ t.status }}</span>
+  </div>
+  <div class="t-meta">
+    <div class="t-meta-row"><span>📅</span><span>{{ t.date }} · {{ t.time }}</span></div>
+    <div class="t-meta-row"><span>💰</span><span>Entry: {{ t.entry_fee | currency }}</span></div>
+    <div class="t-meta-row"><span>🏆</span><span>Prize: {{ t.prize_pool | currency }}</span></div>
+    <div class="t-meta-row"><span>👥</span><span>{{ t.confirmed_count or 0 }} / {{ t.max_teams }} Teams</span></div>
+  </div>
+  <div class="progress"><div class="progress-bar" style="width: {{ 100 * ((t.confirmed_count or 0) / t.max_teams) if t.max_teams else 0 }}%"></div></div>
+  {% set can_register = t.is_open_for_registration %}
+  {% if can_register %}
+    <a class="btn btn-accent btn-block mt" href="{{ url_for('public.tournament_detail', tournament_id=t.id) }}">REGISTER NOW</a>
+  {% else %}
+    <button class="btn btn-block btn-disabled mt" disabled>REGISTRATION CLOSED</button>
+  {% endif %}
+</div>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/registration.js') }}"></script>
+{% endblock %}
+{% block content %}
+<h1 class="page-title">Register Your Team</h1>
+<div class="tabs card">
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-step="1">1. Team Info</button>
+    <button class="tab-btn" data-step="2">2. Payment</button>
+    <button class="tab-btn" data-step="3">3. Screenshot & Submit</button>
+  </div>
+  <form id="regForm" method="post" action="{% if tournament %}{{ url_for('registrations.submit', tournament_id=tournament.id) }}{% endif %}" enctype="multipart/form-data" class="form" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="tournament_id" value="{{ tournament.id if tournament else '' }}" />
+
+    <div class="tab-panel active" data-panel="1">
+      <h2>Team Information</h2>
+      <label>Team Name *
+        <input type="text" name="team_name" required data-validate="required" />
+        <small class="field-error" data-for="team_name"></small>
+      </label>
+      <div class="grid-2">
+        <label>Captain Name *<input type="text" name="captain_name" required data-validate="required" />
+          <small class="field-error" data-for="captain_name"></small>
+        </label>
+        <label>Captain Phone * (10 digits)<input type="tel" name="captain_phone" maxlength="10" required data-validate="phone" />
+          <small class="field-error" data-for="captain_phone"></small>
+        </label>
+      </div>
+      <h2>Players (4 required)</h2>
+      {% for i in range(1,5) %}
+      <div class="player-block card card-inner">
+        <h3>Player {{ i }}</h3>
+        <div class="grid-2">
+          <label>Name *
+            <input type="text" name="player_{{ i }}_name" required data-validate="required" />
+            <small class="field-error" data-for="player_{{ i }}_name"></small>
+          </label>
+          <label>Free Fire UID * (numeric 9–12 digits)
+            <input type="text" name="player_{{ i }}_uid" required data-validate="uid" data-player="{{ i }}" />
+            <small class="field-error" data-for="player_{{ i }}_uid"></small>
+          </label>
+          <label>Level * (> 30)
+            <input type="number" min="1" name="player_{{ i }}_level" required data-validate="level" data-player="{{ i }}" />
+            <small class="field-error" data-for="player_{{ i }}_level"></small>
+          </label>
+        </div>
+      </div>
+      {% endfor %}
+      <button type="button" class="btn btn-accent" id="goStep2">Continue to Payment</button>
+    </div>
+
+    <div class="tab-panel" data-panel="2">
+      <h2>Payment Details</h2>
+      <div class="payment-card card card-inner">
+        <div class="payment-amount">
+          <span class="payment-label">Amount to Pay</span>
+          <span class="accent big payment-fee">{{ (tournament.entry_fee if tournament else 0) | currency }}</span>
+        </div>
+
+        <div class="payment-layout">
+          <div class="payment-qr-wrap">
+            {% if config.get('UPI_QR_IMAGE') %}
+              <img class="payment-qr" src="{{ config.get('UPI_QR_IMAGE') }}" alt="Scan to pay with PhonePe / UPI" />
+            {% else %}
+              <img class="payment-qr" src="{{ url_for('static', filename='images/upi_qr.jpeg') }}" alt="Scan to pay with PhonePe / UPI" />
+            {% endif %}
+            <p class="qr-hint">Scan with PhonePe / GPay / any UPI app</p>
+          </div>
+
+          <div class="payment-meta">
+            <div class="payment-row">
+              <span class="payment-label">Payee</span>
+              <strong>{{ config.get('UPI_NAME') or 'VISMAY CM' }}</strong>
+            </div>
+            <div class="payment-row">
+              <span class="payment-label">UPI ID</span>
+              <div class="upi-copy-row">
+                <code id="upiIdValue">{{ config.get('UPI_ID') or '8660267306@axl' }}</code>
+                <button type="button" class="btn btn-sm btn-outline" id="copyUpiBtn" title="Copy UPI ID">Copy</button>
+              </div>
+            </div>
+            <ul class="payment-steps">
+              <li>Open PhonePe / GPay / Paytm / any UPI app</li>
+              <li>Scan the QR <strong>or</strong> paste the UPI ID</li>
+              <li>Pay <strong>exactly</strong> the amount shown above</li>
+              <li>Save the payment screenshot for the next step</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="muted payment-note">After payment, continue to upload the screenshot and enter the transaction / reference ID.</p>
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn-outline" data-back="1">Back</button>
+        <button type="button" class="btn btn-accent" id="goStep3">Upload & Finalize</button>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="3">
+      <h2>Finalize Registration</h2>
+      <label>Payment Screenshot * (PNG/JPG, max 10MB)
+        <input type="file" name="payment_screenshot" accept="image/*" required data-validate="screenshot" />
+        <small class="field-error" data-for="payment_screenshot"></small>
+      </label>
+      <label>Transaction / Reference ID *
+        <input type="text" name="payment_transaction_id" required data-validate="required" />
+        <small class="field-error" data-for="payment_transaction_id"></small>
+      </label>
+      <p class="muted">After submitting, your registration status will be <b>PENDING PAYMENT VERIFICATION</b> until the admin approves.</p>
+      <div class="row">
+        <button type="button" class="btn btn-outline" data-back="2">Back</button>
+        <button type="submit" class="btn btn-accent">Submit Registration</button>
+      </div>
+    </div>
+    <div id="formSummaryErrors" class="flash flash-danger hidden"></div>
+  </form>
+</div>
+{% endblock %}

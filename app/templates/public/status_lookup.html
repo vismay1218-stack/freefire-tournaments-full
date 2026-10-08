@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Check Status{% endblock %}
+{% block content %}
+<h1 class="page-title">Check Registration Status</h1>
+<div class="card" style="max-width:520px">
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <label>Registration ID
+      <input type="text" name="registration_id" required placeholder="PV-0012" />
+    </label>
+    <label>Captain Phone (10 digits)
+      <input type="tel" maxlength="10" name="captain_phone" required placeholder="98XXXXXXXX" />
+    </label>
+    <button class="btn btn-accent btn-block" type="submit">Check Status</button>
+  </form>
+</div>
+{% endblock %}

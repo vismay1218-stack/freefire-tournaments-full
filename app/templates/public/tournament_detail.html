@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Tournament Details{% endblock %}
+{% block content %}
+{% if tournament %}
+  <div class="card detail-card">
+    <div class="flex-between">
+      <h1 class="page-title mb0">{{ tournament.name }}</h1>
+      <span class="badge badge-{{ tournament.status | lower }}">{{ tournament.status }}</span>
+    </div>
+    <p class="muted">{{ tournament.description }}</p>
+    <div class="grid-2">
+      <div class="kv"><b>Date / Time</b><span>{{ tournament.date }} · {{ tournament.time }}</span></div>
+      <div class="kv"><b>Map</b><span>{{ tournament.map_name }}</span></div>
+      <div class="kv"><b>Entry Fee</b><span>{{ tournament.entry_fee | currency }}</span></div>
+      <div class="kv"><b>Prize Pool</b><span>{{ tournament.prize_pool | currency }}</span></div>
+      <div class="kv"><b>Max Teams</b><span>{{ tournament.max_teams }}</span></div>
+      <div class="kv"><b>Registered</b><span>{{ tournament.confirmed_count or 0 }} confirmed</span></div>
+      <div class="kv grid-span-2"><b>Registration Deadline</b><span>{{ tournament.registration_deadline }}</span></div>
+    </div>
+    <h2>Rules & Requirements</h2>
+    <div class="rules">{{ tournament.rules | default('No rules specified.') }}</div>
+    <h2>Payment Information</h2>
+    <div class="card card-inner payment-card">
+      <div class="payment-amount">
+        <span class="payment-label">Amount to Pay</span>
+        <span class="accent big payment-fee">{{ tournament.entry_fee | currency }}</span>
+      </div>
+      <div class="payment-layout">
+        <div class="payment-qr-wrap">
+          {% if config.get('UPI_QR_IMAGE') %}
+            <img class="payment-qr" src="{{ config.get('UPI_QR_IMAGE') }}" alt="Scan to pay with PhonePe / UPI" />
+          {% else %}
+            <img class="payment-qr" src="{{ url_for('static', filename='images/upi_qr.jpeg') }}" alt="Scan to pay with PhonePe / UPI" />
+          {% endif %}
+          <p class="qr-hint">Scan with PhonePe / GPay / any UPI app</p>
+        </div>
+        <div class="payment-meta">
+          <div class="payment-row">
+            <span class="payment-label">Payee</span>
+            <strong>{{ config.get('UPI_NAME') or 'VISMAY CM' }}</strong>
+          </div>
+          <div class="payment-row">
+            <span class="payment-label">UPI ID</span>
+            <code>{{ config.get('UPI_ID') or '8660267306@axl' }}</code>
+          </div>
+          <p class="muted" style="margin:0">Save the transaction screenshot — you’ll upload it during registration.</p>
+        </div>
+      </div>
+    </div>
+    {% set can_register = tournament.is_open_for_registration %}
+    {% if can_register %}
+      <a class="btn btn-accent btn-lg btn-block mt" href="{{ url_for('public.register_start', tournament_id=tournament.id) }}">REGISTER NOW</a>
+    {% else %}
+      <button class="btn btn-disabled btn-lg btn-block mt" disabled>REGISTRATION CLOSED</button>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="card"><p class="muted">Tournament not loaded yet.</p></div>
+{% endif %}
+{% endblock %}

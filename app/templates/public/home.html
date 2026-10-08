@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <h1 class="hero-title">Welcome to <span class="accent">{{ site_name }}</span></h1>
+    <p class="hero-sub">Register your squad. Battle for the prize. Prove you're the best in Free Fire.</p>
+    <div class="hero-cta row">
+      <a class="btn btn-accent btn-lg" href="{{ url_for('public.tournaments') }}">View Tournaments</a>
+      <a class="btn btn-outline btn-lg" href="#tournaments">Register Now</a>
+    </div>
+  </div>
+</section>
+
+<section id="tournaments" class="section">
+  <div class="flex-between">
+    <h2 class="section-title">🏆 Upcoming Tournaments</h2>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('public.tournaments') }}">View All</a>
+  </div>
+  {% if tournaments %}
+    <div class="card-grid tournament-grid">
+      {% for t in tournaments %}
+        {% include "public/_tournament_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card"><p class="muted">No tournaments scheduled. Check back soon!</p></div>
+  {% endif %}
+</section>
+
+<section class="section winners-section">
+  <div class="flex-between">
+    <h2 class="section-title">🏆 Winners & Tournament Proofs</h2>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('public.winners') }}">View All</a>
+  </div>
+  {% if winners %}
+    <div class="card-grid winners-grid">
+      {% for w in winners %}
+        <div class="card winner-card">
+          <img src="{{ url_for('public_media.winner_image', filename=w.image_path) }}" alt="{{ w.title }}" class="winner-img" />
+          <div class="winner-meta">
+            <h3>{{ w.title }}</h3>
+            <p class="muted">{{ w.description }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card"><p class="muted">No winners uploaded yet.</p></div>
+  {% endif %}
+</section>
+{% endblock %}
