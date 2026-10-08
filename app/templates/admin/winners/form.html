@@ -1,0 +1,28 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Edit Winner' if winner else 'New Winner' }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ 'Edit Winner' if winner else 'New Winner/Proof' }}</h1>
+<form method="post" class="form card p-lg" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <label>Title<input required name="title" value="{{ winner.title if winner else '' }}" /></label>
+  <label>Description<textarea name="description" rows="3">{{ winner.description if winner else '' }}</textarea></label>
+  <label>Tournament
+    <select name="tournament_id">
+      <option value="">-- No Tournament --</option>
+      {% for t in tournaments %}
+        <option value="{{ t.id }}" {% if winner and winner.tournament_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Image{% if not winner %} (required){% endif %}
+    <input type="file" name="image" accept="image/*" {% if not winner %}required{% endif %} />
+  </label>
+  <label class="checkbox-inline">
+    <input type="checkbox" name="published" {% if winner and winner.published %}checked{% endif %} /> Published (visible on user website)
+  </label>
+  <div class="row">
+    <button class="btn btn-accent" type="submit">Save</button>
+    <a class="btn btn-outline" href="{{ url_for('admin_winners.list_') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

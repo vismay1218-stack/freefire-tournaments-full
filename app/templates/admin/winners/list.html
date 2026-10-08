@@ -1,0 +1,44 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Winners & Proofs{% endblock %}
+{% block content %}
+<div class="flex-between">
+  <h1 class="page-title">Winners & Proofs</h1>
+  <a class="btn btn-accent" href="{{ url_for('admin_winners.create') }}">+ Add Winner</a>
+</div>
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Image</th><th>Title</th><th>Tournament</th><th>Published</th><th>Created</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    {% for w in winners %}
+      <tr>
+        <td>{{ w.id }}</td>
+        <td>
+          {% if w.image_path %}
+            <img src="{{ url_for('public_media.winner_image', filename=w.image_path) }}" height="48" alt="" />
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ w.title }}</td>
+        <td>{% if w.tournament %}{{ w.tournament.name }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{% if w.published %}<span class="badge badge-open">Yes</span>{% else %}<span class="badge badge-closed">No</span>{% endif %}</td>
+        <td>{{ w.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline" href="{{ url_for('admin_winners.edit', winner_id=w.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin_winners.toggle_publish', winner_id=w.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button class="btn btn-sm btn-outline" type="submit">Toggle</button>
+          </form>
+          <form method="post" action="{{ url_for('admin_winners.delete', winner_id=w.id) }}" style="display:inline" onsubmit="return confirm('Delete?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button class="btn btn-sm btn-red" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No winners yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
