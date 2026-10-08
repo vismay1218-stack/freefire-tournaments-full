@@ -1,0 +1,109 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Registration #{{ registration.id }} - {{ registration.team_name }}{% endblock %}
+{% block content %}
+<div class="header-actions">
+  <h1 class="page-title">Registration: {{ registration.team_name }}</h1>
+  <a class="btn btn-outline" href="{{ url_for('admin_registrations.list_') }}">Back to List</a>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h2 style="margin:0;">Overview</h2>
+      <div>
+        <span class="badge badge-{{ registration.registration_status | lower | replace('_','-') }}">
+          {{ registration.registration_status | replace('_', ' ') | title }}
+        </span>
+        <span class="badge badge-outline">
+          Payment: {{ registration.payment_status | replace('_', ' ') | title }}
+        </span>
+      </div>
+    </div>
+
+    <div class="kv">
+      <b>Tournament</b>
+      <span>
+        {% if registration.tournament %}
+          <a href="{{ url_for('admin_tournaments.view', tournament_id=registration.tournament.id) }}">
+            {{ registration.tournament.name }}
+          </a> (Fee: {{ registration.tournament.entry_fee | currency }})
+        {% else %}
+          —
+        {% endif %}
+      </span>
+    </div>
+    <div class="kv"><b>Assigned Team ID</b><span>{{ registration.registration_id or 'Not assigned yet' }}</span></div>
+    <div class="kv"><b>Captain Name</b><span>{{ registration.captain_name }}</span></div>
+    <div class="kv"><b>Captain Phone</b><span><a href="tel:{{ registration.captain_phone }}">{{ registration.captain_phone }}</a></span></div>
+    <div class="kv"><b>Transaction ID</b><span><code>{{ registration.payment_transaction_id or '—' }}</code></span></div>
+    <div class="kv"><b>Submitted At</b><span>{{ registration.created_at.strftime('%Y-%m-%d %H:%M:%S') if registration.created_at else '—' }}</span></div>
+    <div class="kv"><b>Confirmation Date</b><span>{{ registration.confirmation_date.strftime('%Y-%m-%d %H:%M:%S') if registration.confirmation_date else '—' }}</span></div>
+
+    {% if registration.registration_status == 'REJECTED' %}
+      <div class="kv"><b>Rejection Reason</b><span class="stat-red">{{ registration.rejection_reason or '—' }}</span></div>
+    {% endif %}
+
+    {% if registration.registration_status == 'PENDING_PAYMENT_VERIFICATION' %}
+      <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('admin_registrations.approve', registration_id=registration.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button class="btn btn-green" type="submit">Approve Registration</button>
+        </form>
+        <form method="post" action="{{ url_for('admin_registrations.reject', registration_id=registration.id) }}" style="display:flex;gap:6px;align-items:center;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="text" name="rejection_reason" placeholder="Reason for rejection" required style="padding:8px 12px;font-size:0.9rem;" />
+          <button class="btn btn-red" type="submit">Reject</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Payment Proof</h2>
+    {% if registration.payment_screenshot %}
+      <div style="text-align:center;margin-top:1rem;">
+        <a target="_blank" href="{{ url_for('admin_registrations.serve_screenshot', filename=registration.payment_screenshot) }}">
+          <img src="{{ url_for('admin_registrations.serve_screenshot', filename=registration.payment_screenshot) }}"
+               alt="Payment Screenshot"
+               style="max-width:100%;max-height:350px;border-radius:8px;border:1px solid var(--border);object-fit:contain;" />
+        </a>
+        <div style="margin-top:8px;">
+          <a class="btn btn-sm btn-outline" target="_blank" href="{{ url_for('admin_registrations.serve_screenshot', filename=registration.payment_screenshot) }}">
+            Open Full Size ↗
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <p class="muted">No screenshot uploaded.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:1.5rem;">
+  <h2>Team Lineup (4 Players)</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player Name</th>
+          <th>Free Fire UID</th>
+          <th>In-Game Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in registration.players %}
+          <tr>
+            <td><strong>Player {{ p.player_index }}</strong></td>
+            <td>{{ p.name }}</td>
+            <td><code>{{ p.ff_uid }}</code></td>
+            <td><span class="badge badge-outline">Level {{ p.ff_level }}</span></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="muted">No player details recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
