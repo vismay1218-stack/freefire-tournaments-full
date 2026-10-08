@@ -1,0 +1,59 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
+<div class="card-grid">
+  <div class="card stat-card"><div class="stat-label">Total Tournaments</div><div class="stat-value">{{ total_tournaments }}</div></div>
+  <div class="card stat-card"><div class="stat-label">Open Tournaments</div><div class="stat-value">{{ open_tournaments }}</div></div>
+  <div class="card stat-card"><div class="stat-label">Total Registrations</div><div class="stat-value">{{ total_registrations }}</div></div>
+  <div class="card stat-card"><div class="stat-label">Confirmed Teams</div><div class="stat-value stat-green">{{ confirmed_registrations }}</div></div>
+  <div class="card stat-card"><div class="stat-label">Pending Payments</div><div class="stat-value stat-orange">{{ pending_registrations }}</div></div>
+  <div class="card stat-card"><div class="stat-label">Rejected</div><div class="stat-value stat-red">{{ rejected_registrations }}</div></div>
+</div>
+
+<div class="row">
+  <a class="btn btn-accent" href="{{ url_for('admin_tournaments.create') }}">+ Create Tournament</a>
+  <a class="btn btn-outline" href="{{ url_for('admin_tournaments.list_') }}">Manage Tournaments</a>
+  <a class="btn btn-outline" href="{{ url_for('admin_registrations.list_') }}">View Registrations</a>
+  <a class="btn btn-outline" href="{{ url_for('admin_export.excel') }}">Download Excel</a>
+  <a class="btn btn-outline" href="{{ url_for('admin_winners.list_') }}">Manage Winners</a>
+</div>
+
+<section class="section">
+  <h2>Recent Registrations</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Team</th><th>Tournament</th><th>Phone</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in recent_registrations %}
+        <tr>
+          <td><strong>{{ r.team_name }}</strong></td>
+          <td>{% if r.tournament %}{{ r.tournament.name }}{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td>{{ r.captain_phone }}</td>
+          <td>
+            {% if r.registration_status == 'CONFIRMED' %}
+              <span class="badge badge-green">Confirmed</span>
+            {% elif r.registration_status == 'PENDING_PAYMENT_VERIFICATION' %}
+              <span class="badge badge-orange">Pending Payment</span>
+            {% elif r.registration_status == 'REJECTED' %}
+              <span class="badge badge-red">Rejected</span>
+            {% else %}
+              <span class="badge">{{ r.registration_status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td><a class="btn btn-sm btn-outline" href="{{ url_for('admin_registrations.view', registration_id=r.id) }}">View</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted">No registrations yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Pending Payment Verifications</h2>
+  {% include "admin/partials/pending_payments.html" %}
+</section>
+{% endblock %}
